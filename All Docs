@@ -1,0 +1,631 @@
+# 6Hats-GPT 
+
+
+
+```
+6Hats-GPT/
+├── README.md
+├── LICENSE
+├── .gitignore
+├── config/
+│   └── instructions.md
+├── src/
+│   ├── 6hats_cli.py
+│   ├── 6hats_provider_stub.py
+│   └── prompt_template.txt
+├── examples/
+│   ├── usage_samples.md
+│   └── sample_topic.txt
+└── .github/
+    └── workflows/
+        └── ci.yml
+```
+
+---
+
+## File: `README.md`
+
+````markdown
+# 6Hats-GPT
+
+A tiny, dependency-free toolkit for running Edward de Bono’s **Six Thinking Hats** analysis from the command line or integrating the method into your own LLM workflows.
+
+- **CLI**: Generate a clean Markdown (or JSON) scaffold in seconds.
+- **LLM-ready**: Drop in your provider code to auto-generate full analyses.
+- **Portable prompts**: Canonical instructions & a reusable template.
+
+---
+
+## Quick start
+
+```bash
+# Clone (or copy these files) and run:
+python src/6hats_cli.py "Should we launch a premium tier in Q4?"
+
+# JSON output
+python src/6hats_cli.py "Adopt a four-day workweek?" --format json
+
+# Ask an LLM to write the full analysis (implement call_llm first)
+python src/6hats_cli.py "Migrate to serverless?" --auto --model gpt-4o
+````
+
+The CLI works out of the box with **no external dependencies**. The `--auto` flag requires you to implement `call_llm()` in `src/6hats_provider_stub.py`.
+
+---
+
+## What’s inside
+
+```
+6Hats-GPT/
+├── config/
+│   └── instructions.md          # Canonical method & behavior
+├── src/
+│   ├── 6hats_cli.py             # CLI tool (no deps)
+│   ├── 6hats_provider_stub.py   # Plug in your LLM provider here
+│   └── prompt_template.txt      # Provider-agnostic prompt
+├── examples/
+│   ├── usage_samples.md         # Example outputs
+│   └── sample_topic.txt         # Example input topic
+├── .github/workflows/ci.yml     # Minimal CI smoke tests
+├── .gitignore                   # Python ignores
+├── LICENSE                      # MIT by default (edit holder)
+└── README.md                    # This file
+```
+
+---
+
+## Features
+
+* Six Thinking Hats structure: **White, Red, Yellow, Black, Green, Blue**.
+* Neutral, structured outputs suitable for docs, wikis, or decision memos.
+* JSON export for downstream tooling.
+* Minimal CI that compiles sources & runs a smoke test.
+
+---
+
+## Usage details
+
+### CLI flags
+
+```text
+positional: topic                    The question/issue to analyze
+--format {md,json,txt} (default md)  Output format
+--out PATH                           Save to file instead of stdout
+--auto                               Use your LLM via call_llm()
+--model NAME                         Hint passed to your provider
+```
+
+### LLM integration
+
+Edit `src/6hats_provider_stub.py` and implement `call_llm()` for your provider. A commented example is included for OpenAI’s Python SDK; you can adapt similarly for Anthropic, Azure OpenAI, Groq, etc.
+
+### Using the prompts elsewhere
+
+* **`config/instructions.md`**: Paste into system/developer instructions for a custom GPT or agent.
+* **`src/prompt_template.txt`**: Use as a one-shot prompt (it expands `{{TOPIC}}` and `{{TODAY}}`).
+
+---
+
+## Example
+
+```bash
+python src/6hats_cli.py "Should we adopt a four-day workweek?" --format md > workweek.md
+```
+
+See `examples/usage_samples.md` for a filled example.
+
+---
+
+## License
+
+Released under the MIT License. See `LICENSE`.
+
+````
+
+---
+
+## File: `LICENSE`
+
+```text
+MIT License
+
+Copyright (c) 2025 6Hats contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+````
+
+---
+
+## File: `.gitignore`
+
+```gitignore
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+.eggs/
+*.egg-info/
+
+# Virtual environments
+.venv/
+.env/
+
+# Editors
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+```
+
+---
+
+## File: `config/instructions.md`
+
+````markdown
+# 6Hats — Operating Instructions
+
+This GPT assists users by applying **Edward de Bono’s Six Thinking Hats** to analyze questions or issues.
+It organizes responses into six clearly labeled sections and maintains a **neutral, structured** tone while synthesizing perspectives (no personal opinions).
+
+## Structure (always in this order)
+
+1. **White Hat – Facts & Data**
+   - Objective facts known, unknowns, assumptions, constraints, definitions, sources.
+2. **Red Hat – Feelings & Intuition**
+   - Reasonable emotional reactions, gut instincts, stakeholder sentiments, uncertainties.
+3. **Yellow Hat – Positives & Benefits**
+   - Advantages, opportunities, potential value, best-case elements.
+4. **Black Hat – Risks & Downsides**
+   - Pitfalls, costs, failure modes, compliance/security issues, trade-offs.
+5. **Green Hat – Ideas & Alternatives**
+   - Creative options, reframes, experiments, pilots, mitigations, combinations.
+6. **Blue Hat – Summary & Process**
+   - Synthesize above, outline decision criteria, next steps, owners, timelines.
+
+## Style & Constraints
+
+- **Neutral facilitator**: Do not assert personal opinions; synthesize likely viewpoints.
+- **Clarity**: Use concise bullet points and short paragraphs.
+- **No chain-of-thought**: Provide final structured outputs only.
+- **Integrated summary**: End with a brief consensus-style paragraph reflecting all six hats.
+- **Dates**: Use absolute dates when time is relevant.
+
+## Output Signature (Markdown)
+
+```md
+# White Hat (Facts & Data)
+- …
+
+# Red Hat (Feelings & Intuition)
+- …
+
+# Yellow Hat (Positives & Benefits)
+- …
+
+# Black Hat (Risks & Downsides)
+- …
+
+# Green Hat (Creative Alternatives)
+- …
+
+# Blue Hat (Summary & Process)
+- **Decision frame**: …
+- **Criteria**: …
+- **Next steps**: …
+
+---
+**Integrated summary**: …
+````
+
+## Notes
+
+* Keep sections distinct; avoid redundancy.
+* When stakes are high, suggest validating facts with sources.
+
+````
+
+---
+
+## File: `src/6hats_cli.py`
+
+```python
+#!/usr/bin/env python3
+"""
+6Hats CLI — generate Six Thinking Hats analyses.
+
+Usage:
+  python src/6hats_cli.py "Should we adopt a four-day workweek?" --format md
+  python src/6hats_cli.py "Migrate to serverless?" --auto --model gpt-4o
+
+No external dependencies required. The --auto flag calls call_llm() defined
+in src/6hats_provider_stub.py (you implement that function for your provider).
+"""
+
+from __future__ import annotations
+import argparse
+import json
+import os
+import sys
+from datetime import date
+from textwrap import dedent
+
+# Attempt local import when run as `python src/6hats_cli.py`
+try:
+    # When executed from repo root, Python includes src on sys.path
+    from 6hats_provider_stub import call_llm  # type: ignore
+except Exception:
+    call_llm = None  # Fallback if not implemented
+
+# Default prompt template (used if file missing)
+DEFAULT_TEMPLATE = dedent(
+    """
+    You are 6Hats, a facilitator that applies Edward de Bono's Six Thinking Hats.
+
+    TASK: Produce a complete Six Hats analysis for the topic below, following the exact
+    structure and constraints. Do not include chain-of-thought. Output should be in Markdown.
+
+    TOPIC: {{TOPIC}}
+    TODAY: {{TODAY}}
+
+    STRUCTURE (use these headings verbatim):
+    # White Hat (Facts & Data)
+    # Red Hat (Feelings & Intuition)
+    # Yellow Hat (Positives & Benefits)
+    # Black Hat (Risks & Downsides)
+    # Green Hat (Creative Alternatives)
+    # Blue Hat (Summary & Process)
+
+    REQUIREMENTS:
+    - Neutral synthesis; no personal opinions.
+    - Distinct non-overlapping content per section.
+    - Concise bullets and short paragraphs.
+    - End with an "Integrated summary" line after a horizontal rule.
+    - Use absolute dates when relevant.
+    - No references to internal reasoning or chain-of-thought.
+    """
+)
+
+
+def build_prompt(topic: str, template_path: str | None) -> str:
+    template = DEFAULT_TEMPLATE
+    if template_path and os.path.exists(template_path):
+        with open(template_path, "r", encoding="utf-8") as f:
+            template = f.read()
+    return (
+        template.replace("{{TOPIC}}", topic)
+        .replace("{{TODAY}}", date.today().isoformat())
+        .strip()
+    )
+
+
+def scaffold_sections(topic: str) -> dict:
+    """Generate a neutral, dependency-free scaffold for all six hats.
+    This does not claim facts; it frames the analysis with prompts and placeholders
+    that are useful even without an LLM.
+    """
+    return {
+        "white": [
+            f"Topic: {topic}",
+            "What is known (cite reliable sources if used)?",
+            "Unknowns & assumptions to validate",
+            "Constraints (time, budget, scope, compliance)",
+            "Definitions & success metrics",
+        ],
+        "red": [
+            "Likely stakeholder emotions (excitement, anxiety, fatigue, pride)",
+            "Gut instincts worth noting (untested)",
+            "Areas of ambiguity or discomfort",
+        ],
+        "yellow": [
+            "Potential benefits & upside scenarios",
+            "Opportunities (revenue, cost, quality, risk reduction)",
+            "Best-case outcomes & leading indicators",
+        ],
+        "black": [
+            "Key risks, costs, and trade-offs",
+            "Failure modes & early warning signals",
+            "Regulatory, security, privacy, or ethical concerns",
+        ],
+        "green": [
+            "Creative alternatives & permutations",
+            "Small bets: pilots, A/B tests, phased rollouts",
+            "Risk mitigations & contingency plans",
+        ],
+        "blue": [
+            "Decision frame & criteria",
+            "Owners, timelines, checkpoints",
+            "Data needed to proceed; next actions",
+        ],
+    }
+
+
+def format_markdown(topic: str, sections: dict) -> str:
+    lines = []
+    lines.append(f"# White Hat (Facts & Data)\n")
+    for item in sections["white"]:
+        lines.append(f"- {item}")
+    lines.append("\n# Red Hat (Feelings & Intuition)\n")
+    for item in sections["red"]:
+        lines.append(f"- {item}")
+    lines.append("\n# Yellow Hat (Positives & Benefits)\n")
+    for item in sections["yellow"]:
+        lines.append(f"- {item}")
+    lines.append("\n# Black Hat (Risks & Downsides)\n")
+    for item in sections["black"]:
+        lines.append(f"- {item}")
+    lines.append("\n# Green Hat (Creative Alternatives)\n")
+    for item in sections["green"]:
+        lines.append(f"- {item}")
+    lines.append("\n# Blue Hat (Summary & Process)\n")
+    for item in sections["blue"]:
+        lines.append(f"- {item}")
+    lines.append("\n---\n**Integrated summary**: Summarize the trade-offs and recommend next steps once facts are validated.")
+    return "\n".join(lines).strip() + "\n"
+
+
+def format_json(topic: str, sections: dict) -> str:
+    payload = {
+        "topic": topic,
+        "white": sections["white"],
+        "red": sections["red"],
+        "yellow": sections["yellow"],
+        "black": sections["black"],
+        "green": sections["green"],
+        "blue": sections["blue"],
+        "integrated_summary": "Summarize the trade-offs and recommend next steps once facts are validated.",
+        "generated_on": date.today().isoformat(),
+    }
+    return json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Generate a Six Thinking Hats analysis.")
+    parser.add_argument("topic", help="The question or issue to analyze.")
+    parser.add_argument("--format", choices=["md", "json", "txt"], default="md", help="Output format.")
+    parser.add_argument("--out", help="Write output to a file (default: stdout).")
+    parser.add_argument("--auto", action="store_true", help="Call your LLM provider via call_llm().")
+    parser.add_argument("--model", help="Model hint passed to provider (optional).")
+    parser.add_argument("--template", default=os.path.join(os.path.dirname(__file__), "prompt_template.txt"), help="Path to prompt template.")
+    args = parser.parse_args(argv)
+
+    topic = args.topic.strip()
+
+    if args.auto:
+        if call_llm is None:
+            sys.stderr.write(
+                "[error] --auto requested but call_llm() is not implemented. Edit src/6hats_provider_stub.py.\n"
+            )
+            return 2
+        prompt = build_prompt(topic, args.template)
+        try:
+            output = call_llm(topic=topic, prompt=prompt, model=args.model)
+        except Exception as e:
+            sys.stderr.write(f"[error] Provider call failed: {e}\n")
+            return 3
+        text = str(output).strip() + ("\n" if not str(output).endswith("\n") else "")
+    else:
+        sections = scaffold_sections(topic)
+        if args.format == "json":
+            text = format_json(topic, sections)
+        elif args.format == "txt":
+            text = format_markdown(topic, sections).replace("# ", "").replace("**", "")
+        else:
+            text = format_markdown(topic, sections)
+
+    if args.out:
+        os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
+        with open(args.out, "w", encoding="utf-8") as f:
+            f.write(text)
+    else:
+        sys.stdout.write(text)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+````
+
+---
+
+## File: `src/6hats_provider_stub.py`
+
+```python
+"""
+Plug your LLM provider here by implementing call_llm().
+
+Return a Markdown string that follows the headings enforced by the prompt template.
+See prompt_template.txt or the DEFAULT_TEMPLATE in 6hats_cli.py.
+"""
+from __future__ import annotations
+from typing import Optional
+
+
+def call_llm(*, topic: str, prompt: str, model: Optional[str] = None, **kwargs) -> str:
+    """Call your LLM and return the Markdown analysis as a string.
+
+    Implement ONE of the patterns below and delete the raise line.
+    """
+    # --- Example (OpenAI Python SDK) ----------------------------------------
+    # import os
+    # from openai import OpenAI
+    # client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    # response = client.chat.completions.create(
+    #     model=model or "gpt-4o-mini",
+    #     messages=[
+    #         {"role": "system", "content": "You are 6Hats, a neutral facilitator."},
+    #         {"role": "user", "content": prompt},
+    #     ],
+    #     temperature=0.3,
+    # )
+    # return response.choices[0].message.content
+
+    # --- Example (Anthropic Claude) -----------------------------------------
+    # import os
+    # import anthropic
+    # client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    # response = client.messages.create(
+    #     model=model or "claude-3-5-sonnet-latest",
+    #     max_tokens=1500,
+    #     system="You are 6Hats, a neutral facilitator.",
+    #     messages=[{"role": "user", "content": prompt}],
+    # )
+    # return response.content[0].text
+
+    # --- Example (Generic HTTP POST) ----------------------------------------
+    # import requests
+    # resp = requests.post("https://your-endpoint", json={"model": model, "prompt": prompt})
+    # resp.raise_for_status()
+    # return resp.json()["text"]
+
+    raise NotImplementedError(
+        "call_llm() is not implemented. Use the examples above to wire your provider."
+    )
+```
+
+---
+
+## File: `src/prompt_template.txt`
+
+```text
+You are 6Hats, a facilitator that applies Edward de Bono's Six Thinking Hats.
+
+TASK: Produce a complete Six Hats analysis for the TOPIC below. Follow the exact
+structure and constraints. Do not include chain-of-thought. Output in Markdown.
+
+TOPIC: {{TOPIC}}
+TODAY: {{TODAY}}
+
+# White Hat (Facts & Data)
+- Present known facts and definitions relevant to the topic.
+- Note unknowns, assumptions to validate, constraints, and success metrics.
+
+# Red Hat (Feelings & Intuition)
+- Summarize likely emotions, intuitions, and stakeholder sentiments.
+
+# Yellow Hat (Positives & Benefits)
+- List advantages, opportunities, and upside scenarios.
+
+# Black Hat (Risks & Downsides)
+- List risks, costs, trade-offs, and failure modes.
+
+# Green Hat (Creative Alternatives)
+- Propose creative options, pilots, mitigations, reframes.
+
+# Blue Hat (Summary & Process)
+- Synthesize above, define decision criteria, owners, timelines, next steps.
+
+---
+**Integrated summary**: Provide a concise, balanced paragraph reflecting all six hats.
+```
+
+---
+
+## File: `examples/usage_samples.md`
+
+```markdown
+# Example: Four-day workweek
+
+## Input
+```
+
+python src/6hats\_cli.py "Should we adopt a four-day workweek?" --format md
+
+```
+
+## Output (illustrative)
+
+# White Hat (Facts & Data)
+- Topic: Should we adopt a four-day workweek?
+- What is known (cite reliable sources if used)?
+- Unknowns & assumptions to validate
+- Constraints (time, budget, scope, compliance)
+- Definitions & success metrics
+
+# Red Hat (Feelings & Intuition)
+- Likely stakeholder emotions (excitement, anxiety, fatigue, pride)
+- Gut instincts worth noting (untested)
+- Areas of ambiguity or discomfort
+
+# Yellow Hat (Positives & Benefits)
+- Potential benefits & upside scenarios
+- Opportunities (revenue, cost, quality, risk reduction)
+- Best-case outcomes & leading indicators
+
+# Black Hat (Risks & Downsides)
+- Key risks, costs, and trade-offs
+- Failure modes & early warning signals
+- Regulatory, security, privacy, or ethical concerns
+
+# Green Hat (Creative Alternatives)
+- Creative alternatives & permutations
+- Small bets: pilots, A/B tests, phased rollouts
+- Risk mitigations & contingency plans
+
+# Blue Hat (Summary & Process)
+- Decision frame & criteria
+- Owners, timelines, checkpoints
+- Data needed to proceed; next actions
+
+---
+**Integrated summary**: Summarize the trade-offs and recommend next steps once facts are validated.
+
+---
+
+> Tip: Use `--auto` after wiring your provider to generate a fully filled-out analysis.
+```
+
+---
+
+## File: `examples/sample_topic.txt`
+
+```text
+Should we launch a premium tier in Q4?
+```
+
+---
+
+## File: `.github/workflows/ci.yml`
+
+```yaml
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile sources
+        run: python -m compileall src
+      - name: CLI smoke test (markdown)
+        run: |
+          python src/6hats_cli.py "CI smoke test topic" --format md | head -n 40
+```
