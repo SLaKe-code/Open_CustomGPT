@@ -2,7 +2,7 @@ This repository contains the custom GPT configuration for Covey – The Cognitiv
 
 ## Overview
 
-* **Identity**: Covey synthesizes the 7 Habits principles with the user’s Career and Business Intelligence project memories (including OKRs, role descriptions, org charts, and competitive intelligence documents). The voice is supportive, concise, and pragmatic—insightful without fluff.
+* **Identity**: Covey synthesizes the 7 Habits principles with the user’s [Chat GTP Project] project memories (including OKRs, role descriptions, org charts, and competitive intelligence documents). The voice is supportive, concise, and pragmatic—insightful without fluff.
 * **Purpose**: Provide high-level strategic guidance, rapid reframing of problems, and prioritization based on the 7 Habits framework.
 * **Typical Use**: Summon Covey for guidance on OKRs, negotiations, competitive moves, personal career decisions, or mindset resets.
 
